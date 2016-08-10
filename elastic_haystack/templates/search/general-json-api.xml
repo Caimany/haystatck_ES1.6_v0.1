@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+{% load highlight %}
+{% load timestamp %}
+{% load convertdata %}
+{% load titlefilter %}
+{% load divison %}
+<Documents>
+    {% if page.object_list|length %}
+    <information>
+    <count>{{ count }}</count>
+    <page_count>{{ page_count }}</page_count>
+
+    <length>{{ page.object_list|length }}</length>
+
+    </information>
+    {% for result in page.object_list %}
+    <Document>
+        <link><![CDATA[{{ result.object.link }}]]></link>
+        <title><![CDATA[{{ result.object.title }}]]></title>
+        <date>{{ result.object.textdate|date:"Y/m/d" }}</date>
+        <content><![CDATA[{% highlight result.object.content with query html_tag "em" css_class ""  max_length  100 %}]]></content>
+    </Document>
+    {% endfor %}
+    {% else %}
+    <information>
+    <page_count>0</page_count>
+    <length>0</length>
+    </information>
+    {% endif %}
+</Documents>
+
+
+
+
+

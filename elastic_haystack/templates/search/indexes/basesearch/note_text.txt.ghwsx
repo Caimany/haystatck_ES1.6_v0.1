@@ -1,0 +1,1 @@
+{{ object.location }}{{ object.sitename }}{{ object.domainname }}{{ object.introduction }}{{ object.status }}{{ object.applytime }}
