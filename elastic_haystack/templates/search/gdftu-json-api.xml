@@ -8,7 +8,6 @@
     {% if page.object_list|length %}
     <information>
     <count>{{ count }}</count>
-    <!--&lt;!&ndash;<page_count>{{ page.paginator.count |div:20|add:1 }}</page_count>-->
     <page_count>{{ page_count }}</page_count>
 
     <length>{{ page.object_list|length }}</length>
@@ -17,7 +16,7 @@
     {% for result in page.object_list %}
     <Document>
         <link><![CDATA[{{ result.object.link }}]]></link>
-        <title><![CDATA[{{ result.object.title }}]]></title>
+        <title><![CDATA[{% highlight result.object.title with query html_tag "em" css_class ""  max_length  100 %}]]></title>
         <date>{{ result.object.textdate|date:"Y/m/d" }}</date>
         <content><![CDATA[{% highlight result.object.content with query html_tag "em" css_class ""  max_length  100 %}]]></content>
     </Document>

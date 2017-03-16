@@ -14,12 +14,14 @@
 
     </information>
     {% for result in page.object_list %}
-    <Document>
-        <link><![CDATA[{{ result.object.link }}]]></link>
-        <title><![CDATA[{{ result.object.title }}]]></title>
-        <date>{{ result.object.textdate|date:"Y/m/d" }}</date>
-        <content><![CDATA[{% highlight result.object.content with query html_tag "em" css_class ""  max_length  100 %}]]></content>
-    </Document>
+    {% if result.object.title  %}
+        <Document>
+            <link><![CDATA[{{ result.object.link }}]]></link>
+            <title><![CDATA[{% highlight result.object.title with query html_tag "em" css_class ""  max_length  100 %}]]></title>
+            <date>{{ result.object.textdate|date:"Y/m/d" }}</date>
+            <content><![CDATA[{% highlight result.object.content with query html_tag "em" css_class ""  max_length  100 %}]]></content>
+        </Document>
+    {% endif %}
     {% endfor %}
     {% else %}
     <information>

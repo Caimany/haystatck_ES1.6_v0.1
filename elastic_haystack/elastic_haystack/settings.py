@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 """
 Django settings for elastic_haystack project.
 
@@ -30,16 +31,15 @@ INSTALLED_APPS = (
     'django.contrib.webdesign',
     'haystack',
     'basesearch',
-    'elastic_haystack',
-    'rest_framework',
-    'drf_haystack',
+    'elasticsearch',
+    # 'elastic_haystack',
+
 
 )
-# HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
-# HAYSTACK_SIGNAL_PROCESSOR = 'celery_haystack.signals.CelerySignalProcessor'
 
 
 
+ELASTICSEARCH_DEFAULT_ANALYZER='index_ansj'
 
 HAYSTACK_DEFAULT_OPERATOR = 'AND'
 
@@ -59,84 +59,50 @@ ROOT_URLCONF = 'elastic_haystack.urls'
 
 WSGI_APPLICATION = 'elastic_haystack.wsgi.application'
 
-# ELASTICSEARCH_INDEX_SETTINGS ={
-#             "settings": {
-#                 "analysis": {
-#                     "analyzer": {
-#                          "ik_max_word": {
-#                              "type": "ik",
-#                              "tokenizer": "ik_max_word",
-#                              "filter": "standard"
-#                          },
-#                         "ngram_analyzer": {
-#                             "type": "custom",
-#                             "tokenizer": "lowercase",
-#                             "filter": ["haystack_ngram"]
-#                         },
-#                         "edgengram_analyzer": {
-#                             "type": "custom",
-#                             "tokenizer": "lowercase",
-#                             "filter": ["haystack_edgengram"]
-#                         }
-#                     },
-#                     "tokenizer": {
-#                         "haystack_ngram_tokenizer": {
-#                             "type": "nGram",
-#                             "min_gram": 1,  #3
-#                             "max_gram": 1,
-#                         },
-#                         "haystack_edgengram_tokenizer": {
-#                             "type": "edgeNGram",
-#                             "min_gram": 1,  #2
-#                             "max_gram": 1,
-#                             "side": "front"
-#                         }
-#                     },
-#                     "filter": {
-#                         "haystack_ngram": {
-#                             "type": "nGram",
-#                             "min_gram": 1,  #3
-#                             "max_gram": 1
-#                         },
-#                         "haystack_edgengram": {
-#                             "type": "edgeNGram",
-#                             "min_gram": 1,   #2
-#                             "max_gram": 1
-#                         }
-#                     }
-#                 }
-#             }
-#         }
-
-ELASTICSEARCH_INDEX_SETTINGS ={
-            "settings": {
-                "analysis": {
-                    "analyzer": {
-                         "ik_max_word": {
-                             "type": "ik",
-                             "tokenizer": "ik_max_word",
-                             "filter": "standard"
-                         },
-                    }
-
-                }
-            }
-        }
 
 
-ELASTICSEARCH_DEFAULT_ANALYZER = "ik_max_word"
-# ELASTICSEARCH_DEFAULT_ANALYZER = "mmseg"
+
+Fields_Mapping  = {
+    'title': 'index_ansj',
+    'content': 'index_ansj',
+    # 'INDEXNUM': 'index_ansj',
+    # 'MENUCAT': 'index_ansj',
+    # 'FILENUM': 'standard',
+    # 'ORGANCAT': 'index_ansj',
+    # 'KEYWORDS': 'index_ansj',
+    # 'TITLE': 'index_ansj',
+    # 'CONTENT': 'index_ansj',
+    # 'DESCRIPTION': 'index_ansj',
+    # 'APPENDIXS': 'index_ansj',
+    # 'URL': 'standard',
+    # 'PUBLISHER': 'whitespace',
+    'autolink': 'standard',
+    # 'clear_indexnum': 'index_ansj',
+    # 'clear_publisher': 'whitespace',  # 发布单位分级,用/隔开 采用path_hierachy
+    # 'provincial_office': 'standard',
+}
 
 
+# Custom_Score = ""
+
+# Custom_Score = "degree1 = doc['degree'].value-10956;degree2 = doc['degree'].value+10956;return _score*1 + degree1/degree2*100;"
+
+Custom_Score = "if (_score > 2) { return 5 } else {return 1} "
+
+"""
+a=doc['degree'].value-25245;b=2000-pow(a,2)/1000;return b*1+_score*1
+
+"""
 
 
 HAYSTACK_CONNECTIONS = {
     'default': {
-       # 'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-        'ENGINE': 'elastic_haystack.utils.ConfigurableElasticSearchEngine',
+       #  'ENGINE': 'elastic_haystack.utils.ConfigurableElasticSearchEngine',
+       #  'ENGINE' : 'basesearch.search_backends.ConfigurableElasticSearchEngine2',
+        'ENGINE':'basesearch.elasticsearch_2.Elasticsearch2SearchEngine',
         'INCLUDE_SPELLING': True,
-        'URL': 'http://127.0.0.1:9200/',
-
+        # 'URL': 'http://127.0.0.1:9200/',
+        'URL': 'http://172.18.9.65:9200/',
         'INDEX_NAME': 'elastic-data1',
     },
 }
@@ -172,12 +138,11 @@ USE_L10N = True
 
 USE_TZ = True
 
-HAYSTACK_CUSTOM_HIGHLIGHTER='elastic_haystack.utils.CustomHighlighter'
+HAYSTACK_CUSTOM_HIGHLIGHTER = 'basesearch.customhighlighter.CustomHighlighter'
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
-
-HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
 
 STATIC_URL = '/static/'
