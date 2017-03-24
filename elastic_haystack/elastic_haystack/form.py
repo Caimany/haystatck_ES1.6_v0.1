@@ -4,6 +4,11 @@ from django import forms
 from haystack.forms import FacetedSearchForm, HighlightedSearchForm, SearchForm
 from haystack.query import SQ
 
+import pytz
+
+from django.utils import timezone
+
+
 """
 # 分词查询
 """
@@ -304,6 +309,10 @@ class SearchForm_gdzf(FacetedSearchForm, HighlightedSearchForm):
     end_applytime = forms.CharField(required=False)
     autolink = forms.CharField(required=False)
 
+
+
+
+
     def search(self):
         # First, store the SearchQuerySet received from other processing.
         sqs = super(SearchForm_gdzf, self).search()
@@ -349,6 +358,8 @@ class SearchForm_maoming(FacetedSearchForm, HighlightedSearchForm):
     end_applytime = forms.CharField(required=False)
     autolink = forms.CharField(required=False)
 
+    timezone.activate(pytz.timezone('Asia/Shanghai'))
+
     def search(self):
         # First, store the SearchQuerySet received from other processing.
         sqs = super(SearchForm_maoming, self).search()
@@ -371,4 +382,5 @@ class SearchForm_maoming(FacetedSearchForm, HighlightedSearchForm):
             if self.cleaned_data['start_applytime'] and self.cleaned_data['end_applytime']:
                 sqs = sqs.filter_and(textdate__gte=self.cleaned_data['start_applytime'],
                                      textdate__lte=self.cleaned_data['end_applytime'])
+
         return sqs
