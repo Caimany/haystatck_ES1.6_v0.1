@@ -20,4 +20,4 @@ urllib3==1.14
 
 优化更新索引   #redis-cli get custom_updated_id_multiple_search_engines |xargs -i  python /home/ubuntu/Haystack/elastic_haystack_multiplesite/elastic_haystack/manage.py custom_update_index --startid {} >> /home/ubuntu/log/cron_upindex.log 2>&1
 
-条件更新索引   #python ./manage.py custom_update_filter --filed webid --filedkey 31
+条件更新索引   #python ./manage.py update_index_by_filter --filed webid --filedkey 31

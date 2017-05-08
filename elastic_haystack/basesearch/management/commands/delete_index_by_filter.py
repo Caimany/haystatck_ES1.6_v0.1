@@ -122,7 +122,6 @@ def do_update(backend, index, qs, start, end, total, verbosity=1, commit=True):
 
 
 
-    # for rmoveid in ["6232581","6224067","6232582","6229733","6232581","6224067","6232582","6229733"]:
     q=SearchQuerySet().filter(autolink='gdgrain gd gov ')
 
     print("请修改具体的filter内容")

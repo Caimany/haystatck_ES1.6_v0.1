@@ -34,6 +34,7 @@ INSTALLED_APPS = (
     'elasticsearch',
     # 'elastic_haystack',
 
+    'raven.contrib.django.raven_compat',
 
 )
 
@@ -151,3 +152,10 @@ TEMPLATE_DIRS = (
     os.path.join(BASE_DIR,  'templates'),
 )
 
+import raven
+RAVEN_CONFIG = {
+    'dsn': 'http://29d35de6a2fb4884981cc516ae517ea1:1ee904e8267d45a18a94f10f5696093c@10.0.0.41/5',
+    # If you are using git, you can also automatically configure the
+    # release based on the git info.
+    # 'release': raven.fetch_git_sha(os.path.dirname(os.pardir)),
+}
