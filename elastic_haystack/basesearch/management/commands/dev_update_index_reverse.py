@@ -195,8 +195,6 @@ class Command(LabelCommand):
                     help='记录索引情况到sqlite indexinfo表中'
                     ),
 
-
-
     )
     option_list = LabelCommand.option_list + base_options
 
@@ -216,19 +214,18 @@ class Command(LabelCommand):
 
         self.sqlite = options.get('sqlite', False)
 
-
         if not self.startid:
-            #print('从数据库读取上一次更新结果')
+            # print('从数据库读取上一次更新结果')
             try:
-                if self.fv :
+                if self.fv:
                     ii = IndexINFO.get(city_num=self.fv)
                     self.startid = ii.last_index_id
-                    print(self.startid,type(self.startid))
+                    print(self.startid, type(self.startid))
 
                 else:
                     ii = IndexINFO.get(city_num=100)
                     self.startid = ii.last_index_id
-                    print(self.startid,type(self.startid))
+                    print(self.startid, type(self.startid))
 
             except:
                 self.startid = 0
@@ -355,16 +352,15 @@ class Command(LabelCommand):
                 city_num = self.fv
             print(update_init_time, "!!!!!!!!!!")
 
-
             if self.sqlite:
-                #print("记录到sqlite中")
+                # print("记录到sqlite中")
                 try:
                     indexinfo = IndexINFO.get(city_num=city_num)
 
                     indexinfo.starttime = update_init_time
-                    indexinfo.endtime=update_stop_time
-                    indexinfo.last_index_total=UPDATE_TOTAL
-                    indexinfo.last_index_id=max_id
+                    indexinfo.endtime = update_stop_time
+                    indexinfo.last_index_total = UPDATE_TOTAL
+                    indexinfo.last_index_id = max_id
                     indexinfo.save()
 
                 except:
@@ -374,15 +370,15 @@ class Command(LabelCommand):
                     c.save()
             else:
                 print('')
-                #print('如需保存结果，\n 请添加 "--sqlite True" 选项')
+                # print('如需保存结果，\n 请添加 "--sqlite True" 选项')
 
             # """
             #     删除已卸载数据
             # """
 
-            index_pks = SearchQuerySet(using=backend.connection_alias).models(model)
-            index_pks = index_pks.values_list('id')
-
+            # index_pks = SearchQuerySet(using=backend.connection_alias).models(model)
+            # index_pks = index_pks.values_list('id')
+            #
             if self.workers > 0:
                 pool = multiprocessing.Pool(self.workers)
                 pool.map(worker, ghetto_queue)
