@@ -106,18 +106,21 @@ def worker(bits):
 #     # Clear out the DB connections queries because it bloats up RAM.
 #     reset_queries()
 
-def do_update(backend, index, qs, start, end, total, verbosity=1, commit=True, **kwargs):
+def do_update(backend, index, qs, start, end, total, verbosity=1, commit=True,index_pks=None, **kwargs):
     # Get a clone of the QuerySet so that the cache doesn't bloat up
     # in memory. Useful when reindexing large amounts of data.
     # small_cache_qs = qs.all()
     # current_qs = small_cache_qs[start:end]
     if kwargs.keys() and kwargs.values():
         current_qs = qs.filter(id__gte=start, id__lt=end, **kwargs)
+        if index_pks:
+            index_pks_1=index_pks.filter_and(id__in=range(int(start),int(end))).filter_and(**kwargs)
+
     else:
         current_qs = qs.filter(id__gte=start, id__lt=end)
-    print(current_qs.count())
-    # return
-    #
+        if index_pks:
+            index_pks_1 = index_pks.filter(id__in=range(int(start),int(end)))
+
     global UPDATE_TOTAL
 
     UPDATE_TOTAL = UPDATE_TOTAL + current_qs.count()
@@ -130,6 +133,20 @@ def do_update(backend, index, qs, start, end, total, verbosity=1, commit=True, *
 
     # FIXME: Get the right backend.
     try:
+
+        if index_pks:
+            if index_pks_1.count() != current_qs.count():
+                index_pk_id=index_pks_1.values_list('pk','id')
+                qs_pk=current_qs.values_list('id')
+                qs_set = set()
+                for qs_pk, in qs_pk:
+                    qs_set.add(str(qs_pk))
+
+                for qs_pk, rec_id in index_pk_id:
+                    if qs_pk not in qs_set:
+                        print('remove stale data %s !'%(rec_id))
+                        backend.remove(rec_id, commit=True)
+
         backend.update(index, current_qs, commit=commit)
     except ConnectionTimeout:
         print('entering single  obeject debug ')
@@ -332,7 +349,9 @@ class Command(LabelCommand):
                         filterkv = {self.fk: self.fv}
                     else:
                         filterkv = {}
-                    do_update(backend, index, qs, start, end, total, verbosity=self.verbosity, commit=self.commit,
+
+                    index_pks = SearchQuerySet(using=backend.connection_alias).models(model)
+                    do_update(backend, index, qs, start, end, total, verbosity=self.verbosity, commit=self.commit,index_pks=index_pks,
                               **filterkv)
                 else:
                     ghetto_queue.append(('do_update', model, start, end, total, using, self.start_date, self.end_date,
@@ -384,51 +403,3 @@ class Command(LabelCommand):
                 pool.map(worker, ghetto_queue)
                 pool.close()
                 pool.join()
-
-            if self.remove:
-                if self.start_date or self.end_date or total <= 0:
-                    # They're using a reduced set, which may not incorporate
-                    # all pks. Rebuild the list with everything.
-                    qs = index.index_queryset().values_list('pk', flat=True)
-                    database_pks = set(smart_bytes(pk) for pk in qs)
-
-                    total = len(database_pks)
-                else:
-                    database_pks = set(smart_bytes(pk) for pk in qs.values_list('pk', flat=True))
-
-                # Since records may still be in the search index but not the local database
-                # we'll use that to create batches for processing.
-                # See https://github.com/django-haystack/django-haystack/issues/1186
-                index_total = SearchQuerySet(using=backend.connection_alias).models(model).count()
-
-                # Retrieve PKs from the index. Note that this cannot be a numeric range query because although
-                # pks are normally numeric they can be non-numeric UUIDs or other custom values. To reduce
-                # load on the search engine, we only retrieve the pk field, which will be checked against the
-                # full list obtained from the database, and the id field, which will be used to delete the
-                # record should it be found to be stale.
-                index_pks = SearchQuerySet(using=backend.connection_alias).models(model)
-                index_pks = index_pks.values_list('pk', 'id')
-
-                # We'll collect all of the record IDs which are no longer present in the database and delete
-                # them after walking the entire index. This uses more memory than the incremental approach but
-                # avoids needing the pagination logic below to account for both commit modes:
-                stale_records = set()
-
-                for start in range(0, index_total, batch_size):
-                    upper_bound = start + batch_size
-
-                    # If the database pk is no longer present, queue the index key for removal:
-                    for pk, rec_id in index_pks[start:upper_bound]:
-                        if smart_bytes(pk) not in database_pks:
-                            stale_records.add(rec_id)
-
-                if stale_records:
-                    if self.verbosity >= 1:
-                        print("  removing %d stale records." % len(stale_records))
-
-                    for rec_id in stale_records:
-                        # Since the PK was not in the database list, we'll delete the record from the search index:
-                        if self.verbosity >= 2:
-                            print("  removing %s." % rec_id)
-
-                        backend.remove(rec_id, commit=self.commit)
