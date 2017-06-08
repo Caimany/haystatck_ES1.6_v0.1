@@ -113,13 +113,13 @@ def do_update(backend, index, qs, start, end, total, verbosity=1, commit=True,in
     # current_qs = small_cache_qs[start:end]
     if kwargs.keys() and kwargs.values():
         current_qs = qs.filter(id__gte=start, id__lt=end, **kwargs)
-        if index_pks:
+        if index_pks and start<end:
             index_pks_1=index_pks.filter_and(id__in=range(int(start),int(end))).filter_and(**kwargs)
 
     else:
         current_qs = qs.filter(id__gte=start, id__lt=end)
-        if index_pks:
-            index_pks_1 = index_pks.filter(id__in=range(int(start),int(end)))
+        if index_pks and start<end:
+            index_pks_1 = index_pks.filter_and(id__in=range(int(start),int(end)))
 
     global UPDATE_TOTAL
 
@@ -134,7 +134,7 @@ def do_update(backend, index, qs, start, end, total, verbosity=1, commit=True,in
     # FIXME: Get the right backend.
     try:
 
-        if index_pks:
+        if index_pks and start<end:
             if index_pks_1.count() != current_qs.count():
                 index_pk_id=index_pks_1.values_list('pk','id')
                 qs_pk=current_qs.values_list('id')

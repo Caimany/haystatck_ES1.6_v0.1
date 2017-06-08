@@ -4,10 +4,20 @@ index_pk_id = [[u'99397', u'basesearch.note.99397'], [u'99398', u'basesearch.not
 
 qs_pk=[(99391L,), (99392L,), (99393L,), (99395L,), (99396L,), (99397L,), (99398L,), (99399L,)]
 
-qs_set = set()
-for i, in qs_pk:
-     qs_set.add(str(i))
 
-for i,j in index_pk_id:
-    if i not in qs_set:
-        print 'i not in ...',i
+qs_set = set()
+
+# for i, in qs_pk:
+#      qs_set.add(str(i))
+#
+# for i,j in index_pk_id:
+#     if i not in qs_set:
+#         print 'i not in ...',i
+
+
+#sort index_pk_id
+s_1 = 0
+for i, in qs_pk:
+    s_1 = 0
+
+    qs_set.add(str(i))
